@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="page-title">CIRO — Presentación a Gerencia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0e1822;
+        --bg-alt: #0a1118;
+        --bg-gradient: radial-gradient(
+          120% 120% at 80% -10%,
+          #13202b 0%,
+          var(--bg) 45%,
+          var(--bg-alt) 100%
+        );
+        --panel: #16242f;
+        --panel-alt: #1b2d3a;
+        --line: rgba(143, 163, 176, 0.16);
+        --line-strong: rgba(143, 163, 176, 0.3);
+        --text: #eaf1f4;
+        --text-dim: #a7bbc7;
+        --text-muted: #7c93a1;
+        /* ⭐ Acento principal = amarillo Quick */
+        --accent: #fdd402;
+        --accent-alt: #57d0e0;
+        --ok: #5fd08c;
+        --error: #f2685c;
+        --pending: var(--accent);
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "IBM Plex Sans", sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+        --radius-card: 14px;
+        --radius-sm: 10px;
+        --radius-tag: 999px;
+        --glow-accent: drop-shadow(0 8px 40px rgba(253, 212, 2, 0.18));
+        --chrome-h: 56px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        background: var(--bg-gradient);
+        color: var(--text);
+        font-family: var(--font-body);
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      .deck {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .chrome {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        height: var(--chrome-h);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+      .chrome-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .chrome-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent);
+      }
+      .chrome-count b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        z-index: 50;
+        background: linear-gradient(90deg, var(--accent-alt), var(--accent));
+        width: 0;
+        transition: width 0.45s cubic-bezier(0.6, 0.1, 0.2, 1);
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: calc(var(--chrome-h) + 40px) 7vw 92px;
+      }
+      .slide.active {
+        display: flex;
+      }
+      .pane {
+        width: 100%;
+        max-width: 1120px;
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      .slide.active .pane {
+        animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+      }
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .stagger > * {
+        opacity: 0;
+        transform: translateY(12px);
+        animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+      }
+      .slide.active .stagger > *:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .slide.active .stagger > *:nth-child(2) {
+        animation-delay: 0.13s;
+      }
+      .slide.active .stagger > *:nth-child(3) {
+        animation-delay: 0.21s;
+      }
+      .slide.active .stagger > *:nth-child(4) {
+        animation-delay: 0.29s;
+      }
+      .slide.active .stagger > *:nth-child(5) {
+        animation-delay: 0.37s;
+      }
+      .slide.active .stagger > *:nth-child(6) {
+        animation-delay: 0.45s;
+      }
+      .slide.active .stagger > *:nth-child(7) {
+        animation-delay: 0.53s;
+      }
+      .slide.active .stagger > *:nth-child(8) {
+        animation-delay: 0.61s;
+      }
+      .slide.active .stagger > *:nth-child(9) {
+        animation-delay: 0.69s;
+      }
+      .slide.active .stagger > *:nth-child(10) {
+        animation-delay: 0.77s;
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent-alt);
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .eyebrow .ln {
+        height: 1px;
+        width: 48px;
+        background: var(--line-strong);
+      }
+      h1 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 1.04;
+      }
+      h2 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: clamp(28px, 3.6vw, 46px);
+        letter-spacing: -0.01em;
+        line-height: 1.05;
+        margin-bottom: 8px;
+      }
+      .lede {
+        color: var(--text-dim);
+        font-size: clamp(15px, 1.5vw, 18px);
+        line-height: 1.55;
+        max-width: 62ch;
+      }
+      .mono {
+        font-family: var(--font-mono);
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .span-full {
+        grid-column: 1 / -1;
+      }
+      .card {
+        background: linear-gradient(
+          180deg,
+          var(--panel) 0%,
+          var(--panel-alt) 100%
+        );
+        border: 1px solid var(--line);
+        border-radius: var(--radius-card);
+        padding: 20px 22px;
+      }
+      .card h3 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 17px;
+        margin-bottom: 7px;
+        letter-spacing: -0.01em;
+      }
+      .card p {
+        color: var(--text-dim);
+        font-size: 13.5px;
+        line-height: 1.5;
+      }
+      .card-accent {
+        border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+      }
+      .card-ok {
+        border-color: color-mix(in srgb, var(--ok) 25%, transparent);
+      }
+      .card-error {
+        border-color: color-mix(in srgb, var(--error) 20%, transparent);
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-top: 30px;
+      }
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-card);
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.015);
+      }
+      .stat-n {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: clamp(30px, 4vw, 48px);
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      .stat-n.stat-accent {
+        color: var(--accent);
+      }
+      .stat-n.stat-alt {
+        color: var(--accent-alt);
+      }
+      .stat-l {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin-top: 9px;
+        line-height: 1.4;
+      }
+      .tag {
+        font-family: var(--font-mono);
+        font-size: 11.5px;
+        letter-spacing: 0.08em;
+        color: var(--text-dim);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-tag);
+        padding: 7px 13px;
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 22px;
+        align-items: stretch;
+        margin-top: 8px;
+      }
+      .compare-arrow {
+        align-self: center;
+        font-family: var(--font-display);
+        font-size: 34px;
+        color: var(--accent);
+      }
+      .col-head {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .col-head-before {
+        color: var(--error);
+      }
+      .col-head-after {
+        color: var(--ok);
+      }
+      .col ul {
+        list-style: none;
+        display: grid;
+        gap: 10px;
+      }
+      .col li {
+        font-size: 14px;
+        color: var(--text-dim);
+        line-height: 1.45;
+        padding-left: 20px;
+        position: relative;
+      }
+      .col li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+      }
+      .col-before li::before {
+        background: var(--error);
+      }
+      .col-after li::before {
+        background: var(--ok);
+      }
+      .scope-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 22px;
+      }
+      .scope-col {
+        display: grid;
+        gap: 10px;
+      }
+      .scope-item {
+        padding: 14px 18px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+        font-size: 13.5px;
+        color: var(--text-dim);
+        line-height: 1.45;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .scope-item .icon {
+        flex-shrink: 0;
+        font-size: 16px;
+        margin-top: 1px;
+      }
+      .scope-do {
+        border-color: color-mix(in srgb, var(--ok) 25%, transparent);
+      }
+      .scope-dont {
+        border-color: color-mix(in srgb, var(--error) 20%, transparent);
+      }
+      .scope-head-do {
+        color: var(--ok);
+        margin-bottom: 2px;
+      }
+      .scope-head-dont {
+        color: var(--error);
+        margin-bottom: 2px;
+      }
+      .roles {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 24px;
+      }
+      .role-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-card);
+        padding: 20px 22px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      }
+      .role-card .ico {
+        font-size: 24px;
+        margin-bottom: 6px;
+      }
+      .role-card .nm {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 17px;
+        margin-bottom: 2px;
+      }
+      .role-card .rl {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent-alt);
+        margin-bottom: 8px;
+      }
+      .role-card p {
+        font-size: 13px;
+        color: var(--text-dim);
+        line-height: 1.5;
+      }
+      .role-card.key {
+        border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+      }
+      .role-card.key .rl {
+        color: var(--accent);
+      }
+      .role-card.centered {
+        grid-column: 1 / -1;
+        max-width: 520px;
+        justify-self: center;
+      }
+      .risk-intro {
+        font-size: 13.5px;
+        color: var(--text-dim);
+        line-height: 1.5;
+        margin-top: 4px;
+        margin-bottom: 18px;
+      }
+      .risk-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .risk-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      }
+      .risk-card .rtag {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .rtag-alto {
+        color: var(--error);
+      }
+      .rtag-medio {
+        color: var(--accent);
+      }
+      .risk-card h4 {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .risk-card .rdesc {
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.4;
+      }
+      .risk-card .rmit {
+        font-size: 12px;
+        color: var(--text-dim);
+        line-height: 1.45;
+        margin-top: 6px;
+        padding-left: 14px;
+        position: relative;
+      }
+      .risk-card .rmit::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 6px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+      }
+      .rmit-mit::before {
+        background: var(--ok);
+      }
+      .rmit-con::before {
+        background: var(--accent);
+      }
+      .rmit-pen {
+        color: var(--accent);
+        font-style: italic;
+      }
+      .rmit-pen::before {
+        background: var(--accent);
+      }
+      .risk-bar {
+        font-size: 12px;
+        padding: 12px 16px;
+        border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+        border-radius: var(--radius-sm);
+        background: color-mix(in srgb, var(--accent) 4%, transparent);
+        color: var(--text-dim);
+        line-height: 1.5;
+        margin-top: 22px;
+      }
+      .milestones {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 18px;
+        margin-top: 26px;
+      }
+      .milestone {
+        text-align: center;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-card);
+        padding: 24px 18px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      }
+      .milestone .day {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 42px;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .milestone .lbl {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      .milestone p {
+        font-size: 13px;
+        color: var(--text-dim);
+        line-height: 1.45;
+        margin-top: 14px;
+      }
+      .milestone-accent {
+        border-color: var(--accent);
+      }
+      .milestone-alt {
+        border-color: var(--accent-alt);
+      }
+      .milestone-ok {
+        border-color: var(--ok);
+      }
+      .milestone-accent .day {
+        color: var(--accent);
+      }
+      .milestone-alt .day {
+        color: var(--accent-alt);
+      }
+      .milestone-ok .day {
+        color: var(--ok);
+      }
+      .go-box {
+        margin-top: 20px;
+        padding: 16px 20px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--accent-alt) 4%, transparent);
+      }
+      .go-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 24px;
+        font-size: 12.5px;
+        color: var(--text-dim);
+      }
+      .go-foot {
+        margin-top: 10px;
+        font-size: 11.5px;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+      }
+      .next-steps {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .next-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-alt));
+      }
+      .next-item .who {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .next-item .what {
+        font-size: 13px;
+        color: var(--text-dim);
+        line-height: 1.4;
+      }
+      .warning-box {
+        margin-top: 12px;
+        padding: 12px 18px;
+        border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+        border-radius: var(--radius-sm);
+        background: color-mix(in srgb, var(--accent) 4%, transparent);
+      }
+      .warning-box .text {
+        font-size: 12.5px;
+        color: var(--text-dim);
+        line-height: 1.5;
+      }
+      .cover h1 {
+        font-size: clamp(72px, 15vw, 168px);
+        letter-spacing: -0.04em;
+      }
+      .cover .glyph {
+        font-family: var(--font-display);
+        font-weight: 700;
+        background: linear-gradient(
+          120deg,
+          #ffe680 0%,
+          var(--accent) 40%,
+          #e8b400 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: var(--glow-accent);
+      }
+      .cover-sub {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: clamp(19px, 2.4vw, 30px);
+        color: var(--text);
+        margin-top: 6px;
+        letter-spacing: -0.01em;
+      }
+      .cover-sub-dim {
+        font-family: var(--font-body);
+        font-size: clamp(14px, 1.3vw, 18px);
+        color: var(--text-dim);
+        margin-top: 12px;
+      }
+      .cover-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 34px;
+      }
+      .closing {
+        text-align: center;
+      }
+      .closing .big {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: clamp(56px, 10vw, 120px);
+        letter-spacing: -0.04em;
+        background: linear-gradient(
+          120deg,
+          #ffe680 0%,
+          var(--accent) 40%,
+          #e8b400 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        filter: var(--glow-accent);
+        margin-bottom: 14px;
+      }
+      .hint {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 40;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+      .hint kbd {
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        padding: 2px 7px;
+        color: var(--text-dim);
+        font-size: 10px;
+      }
+      .nav-arrows {
+        position: fixed;
+        bottom: 16px;
+        right: 24px;
+        z-index: 41;
+        display: flex;
+        gap: 8px;
+      }
+      .nav-arrows button {
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--line-strong);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-dim);
+        font-size: 17px;
+        cursor: pointer;
+        transition: 0.18s;
+      }
+      .nav-arrows button:hover {
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+        color: var(--accent);
+        border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+      }
+      @media (max-width: 880px) {
+        .slide {
+          padding: calc(var(--chrome-h) + 30px) 6vw 96px;
+        }
+        .grid-2,
+        .grid-3,
+        .grid-4,
+        .stats,
+        .scope-grid,
+        .roles,
+        .milestones,
+        .next-steps,
+        .risk-grid {
+          grid-template-columns: 1fr;
+        }
+        .compare {
+          grid-template-columns: 1fr;
+        }
+        .compare-arrow {
+          transform: rotate(90deg);
+        }
+        .go-grid {
+          grid-template-columns: 1fr;
+        }
+        .hint {
+          display: none;
+        }
+      }
+      @media (max-width: 600px) {
+        .chrome {
+          padding: 0 16px;
+          font-size: 10px;
+        }
+        .chrome-brand .chrome-label {
+          display: none;
+        }
+        .nav-arrows {
+          bottom: 12px;
+          right: 12px;
+        }
+        .nav-arrows button {
+          width: 34px;
+          height: 34px;
+          font-size: 15px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+        .pane,
+        .stagger > * {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" id="progress"></div>
+    <header class="chrome" id="chrome">
+      <div class="chrome-brand">
+        <span class="chrome-dot"></span>
+        <span class="chrome-label"></span>
+      </div>
+      <div class="chrome-tagline"></div>
+      <div class="chrome-count mono">
+        <b id="cur">01</b> / <span id="tot">00</span>
+      </div>
+    </header>
+
+    <main class="deck" id="deck"></main>
+
+    <div class="hint">
+      <span><kbd>←</kbd> <kbd>→</kbd> navegar</span>
+      <span><kbd>espacio</kbd> avanzar</span>
+      <span>clic flechas</span>
+    </div>
+    <nav class="nav-arrows">
+      <button id="prev" aria-label="Anterior">‹</button>
+      <button id="next" aria-label="Siguiente">›</button>
+    </nav>
+
+    <script>
+      const PRESENTATION = {
+        brand: "Quick · Proyecto Turing",
+        tagline: "CIRO — Control de Seguridad en Ruta",
+
+        slides: [
+          {
+            type: "cover",
+            data: {
+              eyebrow: "Presentación a Gerencia · Proyecto Turing",
+              glyph: "CIRO",
+              subtitle: "La voz y los oídos de las operaciones.",
+              acronym: [
+                { letter: "C", word: "ontrol" },
+                { letter: "I", word: "nteligente de" },
+                { letter: "R", word: "utas en" },
+                { letter: "O", word: "peración" },
+              ],
+              tags: ["Long Haul · v1", "Piloto 1 jul", "Paso a paso"],
+            },
+          },
+
+          {
+            type: "problem",
+            data: {
+              eyebrow: "Por qué surge",
+              title:
+                "Crecer o mantener la operación implica incrementar personas en tareas repetitivas de seguimiento.",
+              lede: "El seguimiento y la trazabilidad se hacen hoy de forma manual, servicio por servicio. Es necesario, pero mecánico: consume al equipo y no acompaña el ritmo de la operación.",
+              cards: [
+                {
+                  icon: "🔁",
+                  title: "Tareas repetitivas",
+                  desc: "Contactar, verificar y registrar — cerca del 85% de las llamadas de seguimiento son verificaciones de rutina.",
+                  severity: "error",
+                },
+                {
+                  icon: "📈",
+                  title: "Escalar con personas",
+                  desc: "Cubrir más operación implica incrementar personas en las mismas tareas repetitivas.",
+                  severity: "error",
+                },
+                {
+                  icon: "🧠",
+                  title: "Retener el conocimiento",
+                  desc: "El conocimiento operativo no permanece: vive en las personas y se va con ellas.",
+                  severity: "error",
+                },
+                {
+                  icon: "🌙",
+                  title: "Reaccionar a toda hora",
+                  desc: "Reaccionar de forma oportuna ante novedades en cualquier hora del día — una persona no cubre la jornada completa.",
+                  severity: "error",
+                },
+              ],
+            },
+          },
+
+          {
+            type: "features",
+            data: {
+              eyebrow: "Qué es CIRO",
+              title: "CIRO es la voz y los oídos de las operaciones.",
+              lede: "Un agente de inteligencia artificial que orquesta las comunicaciones por voz y texto de la operación: entiende cada servicio, decide cuándo actuar, contacta y registra.",
+              columns: 2,
+              features: [
+                {
+                  icon: "🧠",
+                  title: "Entender y decidir",
+                  desc: "Comprende el contexto de cada servicio y decide a quién contactar, cuándo — y cuándo no hace falta.",
+                },
+                {
+                  icon: "📞",
+                  title: "Comunicar",
+                  desc: "Contacta al conductor por voz y captura la respuesta. CIRO es políglota: voces configurables según el cliente y la operación.",
+                },
+                {
+                  icon: "📝",
+                  title: "Registrar",
+                  desc: "Diligencia cada contacto en la bitácora de forma estructurada y trazable.",
+                },
+                {
+                  icon: "👤",
+                  title: "Gestionar bajo supervisión",
+                  desc: "Gestionar comunicaciones oportunas y controlar los riesgos; el agente propone y alerta, la persona decide. Siempre manda el humano.",
+                  full: true,
+                },
+              ],
+            },
+          },
+
+          {
+            type: "comparison",
+            data: {
+              eyebrow: "Qué resuelve",
+              title:
+                "De un seguimiento manual a un control consistente y trazable.",
+              before: {
+                label: "Hoy",
+                items: [
+                  "El equipo marca y registra, servicio por servicio",
+                  "El seguimiento depende de que alguien llegue a hacerlo",
+                  "El conocimiento se queda en cada persona",
+                  "Crecer el control exige sumar gente",
+                ],
+              },
+              after: {
+                label: "Con CIRO",
+                items: [
+                  "El agente sigue y registra solo, a toda hora",
+                  "Control consistente y trazable, todos los días",
+                  "Cada interacción queda registrada y se vuelve dato",
+                  "El equipo pasa a aportar criterio donde de verdad suma",
+                ],
+              },
+              stats: [
+                {
+                  value: "~85%",
+                  label: "de las llamadas, hoy rutinarias",
+                  color: "accent",
+                },
+                {
+                  value: "24/7",
+                  label: "seguimiento sin depender de turnos",
+                  color: "alt",
+                },
+                {
+                  value: "+0",
+                  label: "personas nuevas para crecer el control",
+                  color: "accent",
+                },
+                {
+                  value: "100%",
+                  label: "de lo gestionado queda registrado",
+                  color: "alt",
+                },
+              ],
+            },
+          },
+
+          {
+            type: "features",
+            data: {
+              eyebrow: "Cómo lo hacemos",
+              title: "Simplificar el proceso antes de automatizarlo.",
+              lede: "Cuatro pasos, en orden.",
+              columns: 2,
+              features: [
+                {
+                  icon: "🗑️",
+                  title: "1 · Dejar atrás",
+                  desc: "Lo que no aporta: buscar datos pestaña por pestaña, copiar a mano, contactar a quien ya fue gestionado.",
+                },
+                {
+                  icon: "🔁",
+                  title: "2 · Alinear / Ajustar",
+                  desc: "Ajustar el proceso para que lo repetitivo lo asuma el agente: contactar, verificar y diligenciar la bitácora.",
+                },
+                {
+                  icon: "⚙️",
+                  title: "3 · Optimizar",
+                  desc: "Una sola vista, y contactar con criterio: solo cuando el contexto lo amerita.",
+                },
+                {
+                  icon: "🤖",
+                  title: "4 · Automatizar",
+                  desc: "Sobre un proceso ya simplificado: detectar, decidir, contactar, registrar y escalar.",
+                },
+              ],
+            },
+          },
+
+          {
+            type: "custom",
+            data: {
+              html: `<div class="eyebrow"><span class="ln"></span> Cómo funciona · un caso real</div>
+        <h2 style="margin-bottom:8px">De una señal que cambia a una acción, en minutos.</h2>
+        <div class="cards-grid stagger" style="margin-top:24px">
+          <div class="card"><h3>1 · CIRO vigila</h3><p>Observa las variables de cada servicio —posición, tiempo, lo registrado—. No llama por llamar.</p></div>
+          <div class="card card-accent"><h3>2 · Detecta algo</h3><p>El vehículo lleva ~25 min detenido y no hay un punto de control que lo explique. Eso dispara una decisión.</p></div>
+          <div class="card"><h3>3 · CIRO contacta</h3><p>"Buenas, le habla CIRO de Quick. Noto una detención, ¿cómo se encuentra?" Ya sabe dónde está: no lo vuelve a preguntar.</p></div>
+          <div class="card"><h3>4 · El conductor responde</h3><p>"Se me pinchó una llanta." CIRO entiende la respuesta.</p></div>
+          <div class="card"><h3>5 · Alerta al humano</h3><p>CIRO genera una alerta en el módulo de control y se la pasa al auxiliar de seguridad, que la gestiona.</p></div>
+          <div class="card card-accent"><h3>¿Y si no es el caso ideal?</h3><p>Si el conductor no contesta, reintenta y escala. Si CIRO no está seguro, alerta a una persona en vez de decidir solo. Ante la duda, <strong>siempre manda el humano</strong>.</p></div>
+        </div>`,
+            },
+          },
+
+          {
+            type: "scope",
+            data: {
+              eyebrow: "Con qué arrancamos",
+              title:
+                "Empezamos por la seguridad de las cargas, donde el impacto es mayor.",
+              lede: "Arranque controlado, con criterios claros: que el agente siga a tiempo, entienda, registre bien y que las alertas lleguen. Si se cumplen, escalamos.",
+              do: [
+                "Carga nacional, sobre vehículos en Satrack (el rastreo con posición confiable, ~70% de la flota)",
+                "Tres clientes, su ruta de mayor volumen: Farmatodo (~1.500), Samsung (~210), Miniso (~60) servicios al año",
+                "Pruebas del agente: 24–25 de junio · arranque del piloto v1: 1 de julio",
+                "El agente sigue, entiende, registra y alerta; la persona gestiona",
+              ],
+              dont: [
+                "Distribución urbana: es el siguiente paso (fase 2)",
+                "Última milla y otras áreas: aún no",
+                "Toda la flota a la vez: primero validar, después escalar",
+                "Reemplazar al equipo: lo libera para tareas de mayor valor",
+              ],
+            },
+          },
+
+          {
+            type: "roadmap",
+            data: {
+              eyebrow: "Hacia dónde va",
+              title:
+                "Paso a paso, hasta ser la voz y los oídos de todas las operaciones.",
+              milestones: [
+                {
+                  day: "1",
+                  label: "FASE · BETA",
+                  desc: "1 de julio: carga nacional, controlado, con datos reales.",
+                  color: "accent",
+                },
+                {
+                  day: "2",
+                  label: "FASE · ESCALA",
+                  desc: "Más rutas y proveedores; una sola vista de toda la flota.",
+                  color: "alt",
+                },
+                {
+                  day: "3",
+                  label: "FASE · MÁS LÍNEAS",
+                  desc: "Distribución urbana, última milla y otras operaciones (BPO, warehouse), con la base ya probada.",
+                  color: "ok",
+                },
+              ],
+              goCriteria: {
+                title: "🔑 La clave: cada día que opera, aprende",
+                items: [
+                  "✅ Cada servicio deja datos",
+                  "✅ Esos datos afinan las decisiones",
+                  "✅ El conocimiento queda en la empresa",
+                  "✅ Cada versión simplifica un proceso más",
+                ],
+                footer:
+                  "CIRO se proyecta como la voz y los oídos de las operaciones de Quick — no solo de seguridad.",
+              },
+            },
+          },
+
+          {
+            type: "roles",
+            data: {
+              eyebrow: "Qué construimos juntos",
+              title:
+                "CIRO detecta y avisa; el criterio de acción lo definimos entre todos.",
+              lede: "Dos cosas las construimos con operaciones y seguridad: el protocolo de acción y mantener los datos de contacto al día.",
+              roles: [
+                {
+                  icon: "🛡️",
+                  name: "Seguridad (Jhon)",
+                  role: "Lo construimos juntos",
+                  desc: 'El "qué hacer" ante cada novedad lo afina quien vive la operación. Ya hay un borrador: el día uno hay protocolo, lo mejoramos sobre la marcha.',
+                  key: true,
+                },
+                {
+                  icon: "🚦",
+                  name: "Tráfico",
+                  role: "Acompaña",
+                  desc: "Valida los guiones y acompaña el arranque del piloto.",
+                  key: true,
+                },
+                {
+                  icon: "📇",
+                  name: "Operaciones y Seguridad",
+                  role: "Datos al día",
+                  desc: "Avisar y actualizar cuando cambia el número de un conductor — sin número correcto no hay llamada. Les damos algo simple y temporal para reportarlo.",
+                  key: true,
+                },
+                {
+                  icon: "👤",
+                  name: "Auxiliar de Seguridad",
+                  role: "Al mando",
+                  desc: "Gestiona las excepciones y aporta criterio. Siempre manda la persona.",
+                  key: true,
+                },
+              ],
+            },
+          },
+
+          {
+            type: "closing",
+            data: {
+              big: "Arrancamos el 1 de julio.",
+              lede: '"Un viaje de mil millas comienza con un solo paso." Un piloto controlado que aprende y crece — hasta volverse la voz y los oídos de las operaciones de Quick.',
+              tags: ["Long Haul", "Paso a paso", "1 jul 2026"],
+              footer: "Quick · Proyecto Turing · Riel Operativo · CIRO",
+            },
+          },
+        ],
+      };
+
+      (function () {
+        "use strict";
+        const deck = document.getElementById("deck");
+        const prog = document.getElementById("progress");
+        const curEl = document.getElementById("cur");
+        const totEl = document.getElementById("tot");
+        const titleEl = document.getElementById("page-title");
+        const chromeLabel = document.querySelector(".chrome-label");
+        const chromeTag = document.querySelector(".chrome-tagline");
+        const { brand, tagline, slides } = PRESENTATION;
+        if (chromeLabel) chromeLabel.textContent = brand;
+        if (chromeTag) chromeTag.textContent = tagline;
+        if (titleEl) titleEl.textContent = tagline || brand;
+
+        function renderCards(cards) {
+          return cards
+            .map((c) => {
+              const variant = c.severity ? `card-${c.severity}` : "";
+              const full = c.full ? " span-full" : "";
+              return `<div class="card ${variant}${full}"><h3>${c.icon} ${c.title}</h3><p>${c.desc}</p></div>`;
+            })
+            .join("");
+        }
+        function renderStats(stats) {
+          if (!stats || !stats.length) return "";
+          return `<div class="stats stagger">${stats
+            .map(
+              (s) =>
+                `<div class="stat"><div class="stat-n ${s.color === "alt" ? "stat-alt" : "stat-accent"}">${s.value}</div><div class="stat-l">${s.label}</div></div>`,
+            )
+            .join("")}</div>`;
+        }
+        function renderTags(tags) {
+          if (!tags || !tags.length) return "";
+          return tags.map((t) => `<span class="tag">${t}</span>`).join("");
+        }
+        const RENDER = {
+          cover(d) {
+            const acroHtml =
+              d.acronym && d.acronym.length
+                ? `<div class="cover-sub-dim">${d.acronym.map((a) => `<b style="color:var(--accent)">${a.letter}</b>${a.word}`).join(" ")}</div>`
+                : "";
+            return `<div class="pane cover">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h1><span class="glyph">${d.glyph}</span></h1>
+        <div class="cover-sub">${d.subtitle}</div>
+        ${acroHtml}
+        <div class="cover-meta">${renderTags(d.tags)}</div>
+      </div>`;
+          },
+          problem(d) {
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        ${d.lede ? `<p class="lede">${d.lede}</p>` : ""}
+        <div class="grid-2 stagger" style="margin-top:24px">${renderCards(d.cards)}</div>
+        ${renderStats(d.stats)}
+      </div>`;
+          },
+          features(d) {
+            const feats = d.features
+              .map((f) => {
+                const full = f.full ? " span-full" : "";
+                return `<div class="card card-accent${full}"><h3>${f.icon} ${f.title}</h3><p>${f.desc}</p></div>`;
+              })
+              .join("");
+            const cols = d.columns === 2 ? "grid-2" : "grid-3";
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        ${d.lede ? `<p class="lede">${d.lede}</p>` : ""}
+        <div class="${cols} stagger" style="margin-top:24px">${feats}</div>
+      </div>`;
+          },
+          comparison(d) {
+            const beforeItems = d.before.items
+              .map((i) => `<li>${i}</li>`)
+              .join("");
+            const afterItems = d.after.items
+              .map((i) => `<li>${i}</li>`)
+              .join("");
+            let bcHtml = "";
+            if (d.businessCase) {
+              const bc = d.businessCase;
+              const savings = bc.savings
+                .map(
+                  (s) =>
+                    `<div class="bc-metric"><span>${s.label}</span><span class="v ${s.class ? "v-" + s.class : ""}">${s.value}</span></div>`,
+                )
+                .join("");
+              const invest = bc.investment
+                .map(
+                  (s) =>
+                    `<div class="bc-metric"><span>${s.label}</span><span class="v ${s.class ? "v-" + s.class : ""}">${s.value}</span></div>`,
+                )
+                .join("");
+              bcHtml = `<div class="business-case stagger"><div class="bc-label">${bc.label}</div><div class="bc-grid"><div class="bc-half bc-half-sav"><div class="hl">✅ Ahorro</div>${savings}</div><div class="bc-half bc-half-inv"><div class="hl">🔴 Inversión</div>${invest}</div></div>${bc.footnote ? `<div class="bc-foot">${bc.footnote}</div>` : ""}</div>`;
+            }
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        <div class="compare stagger">
+          <div class="col col-before card"><div class="col-head col-head-before">🔴 ${d.before.label}</div><ul>${beforeItems}</ul></div>
+          <div class="compare-arrow">→</div>
+          <div class="col col-after card"><div class="col-head col-head-after">🟢 ${d.after.label}</div><ul>${afterItems}</ul></div>
+        </div>
+        ${renderStats(d.stats)}
+        ${bcHtml}
+      </div>`;
+          },
+          scope(d) {
+            const doItems = d.do
+              .map(
+                (i) =>
+                  `<div class="scope-item scope-do"><span class="icon">✅</span> ${i}</div>`,
+              )
+              .join("");
+            const dontItems = d.dont
+              .map(
+                (i) =>
+                  `<div class="scope-item scope-dont"><span class="icon">❌</span> ${i}</div>`,
+              )
+              .join("");
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        ${d.lede ? `<p class="lede">${d.lede}</p>` : ""}
+        <div class="scope-grid stagger">
+          <div class="scope-col"><div class="col-head scope-head-do">✅ Sí hace</div>${doItems}</div>
+          <div class="scope-col"><div class="col-head scope-head-dont">❌ No hace</div>${dontItems}</div>
+        </div>
+      </div>`;
+          },
+          risks(d) {
+            const cards = d.risks
+              .map((r) => {
+                const controls = r.controls
+                  .map(
+                    (c) =>
+                      `<div class="rmit rmit-${c.type}">${c.type === "mit" ? "🛡️" : c.type === "con" ? "🔄" : "⚠️"} ${c.text}</div>`,
+                  )
+                  .join("");
+                return `<div class="risk-card"><div class="rtag rtag-${r.severity}">${r.severity.toUpperCase()}</div><h4>${r.title}</h4><p class="rdesc">${r.desc}</p>${controls}</div>`;
+              })
+              .join("");
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        ${d.intro ? `<p class="risk-intro">${d.intro}</p>` : ""}
+        <div class="risk-grid stagger">${cards}</div>
+        ${d.footer ? `<div class="risk-bar">${d.footer}</div>` : ""}
+      </div>`;
+          },
+          roles(d) {
+            const cards = d.roles
+              .map((r) => {
+                const classes = [];
+                if (r.key) classes.push("key");
+                if (r.centered) classes.push("centered");
+                return `<div class="role-card ${classes.join(" ")}"><div class="ico">${r.icon}</div><div class="nm">${r.name}</div><div class="rl">${r.role}</div><p>${r.desc}</p></div>`;
+              })
+              .join("");
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        ${d.lede ? `<p class="lede">${d.lede}</p>` : ""}
+        <div class="roles stagger">${cards}</div>
+      </div>`;
+          },
+          roadmap(d) {
+            const ms = d.milestones
+              .map(
+                (m) =>
+                  `<div class="milestone milestone-${m.color}"><div class="day">${m.day}</div><div class="lbl">${m.label}</div><p>${m.desc}</p></div>`,
+              )
+              .join("");
+            let goHtml = "";
+            if (d.goCriteria) {
+              const items = d.goCriteria.items
+                .map((i) => `<span>${i}</span>`)
+                .join("");
+              goHtml = `<div class="stagger"><div class="go-box"><div class="col-head" style="margin-bottom:10px">${d.goCriteria.title}</div><div class="go-grid">${items}</div>${d.goCriteria.footer ? `<div class="go-foot">${d.goCriteria.footer}</div>` : ""}</div></div>`;
+            }
+            const ns = d.nextSteps
+              ? d.nextSteps
+                  .map(
+                    (s) =>
+                      `<div class="next-item"><span class="who" style="color:var(--${s.color || "text-dim"})">${s.who}</span><span class="what">${s.what}</span></div>`,
+                  )
+                  .join("")
+              : "";
+            const warning = d.warning
+              ? `<div class="stagger"><div class="warning-box"><span class="text">${d.warning}</span></div></div>`
+              : "";
+            return `<div class="pane">
+        <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
+        <h2>${d.title}</h2>
+        <div class="milestones stagger">${ms}</div>
+        ${goHtml}
+        ${ns ? `<div style="margin-top:18px"><div class="col-head" style="margin-bottom:12px">Próximos pasos</div><div class="next-steps stagger">${ns}</div></div>` : ""}
+        ${warning}
+      </div>`;
+          },
+          closing(d) {
+            return `<div class="pane closing"><div class="stagger">
+        <div class="big">${d.big}</div>
+        <p class="lede" style="margin:0 auto;margin-top:6px">${d.lede}</p>
+        ${d.tags ? `<div style="margin-top:40px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">${renderTags(d.tags)}</div>` : ""}
+        ${d.footer ? `<div style="margin-top:36px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);letter-spacing:.1em">${d.footer}</div>` : ""}
+      </div></div>`;
+          },
+          custom(d) {
+            return `<div class="pane">${d.html}</div>`;
+          },
+        };
+
+        slides.forEach((slide, idx) => {
+          const renderFn = RENDER[slide.type];
+          if (!renderFn) {
+            console.warn(`⚠️ Tipo desconocido: "${slide.type}"`);
+            return;
+          }
+          const section = document.createElement("section");
+          section.className = "slide" + (idx === 0 ? " active" : "");
+          section.innerHTML = renderFn(slide.data);
+          deck.appendChild(section);
+        });
+
+        const slideEls = [...document.querySelectorAll(".slide")];
+        const total = slideEls.length;
+        let current = 0;
+        totEl.textContent = String(total).padStart(2, "0");
+        function show(n) {
+          current = Math.max(0, Math.min(total - 1, n));
+          slideEls.forEach((s, k) =>
+            s.classList.toggle("active", k === current),
+          );
+          prog.style.width = ((current + 1) / total) * 100 + "%";
+          curEl.textContent = String(current + 1).padStart(2, "0");
+        }
+        function next() {
+          show(current + 1);
+        }
+        function prev() {
+          show(current - 1);
+        }
+        document.getElementById("next").onclick = next;
+        document.getElementById("prev").onclick = prev;
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+            e.preventDefault();
+            next();
+          } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+            e.preventDefault();
+            prev();
+          } else if (e.key === "Home") {
+            show(0);
+          } else if (e.key === "End") {
+            show(total - 1);
+          }
+        });
+        let touchX = 0;
+        document.addEventListener(
+          "touchstart",
+          function (e) {
+            touchX = e.touches[0].clientX;
+          },
+          { passive: true },
+        );
+        document.addEventListener(
+          "touchend",
+          function (e) {
+            const dx = e.changedTouches[0].clientX - touchX;
+            if (Math.abs(dx) > 50) {
+              dx < 0 ? next() : prev();
+            }
+          },
+          { passive: true },
+        );
+        show(0);
+      })();
+    </script>
+  </body>
+</html>
