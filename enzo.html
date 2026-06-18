@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENZO · Desvinculaciones automatizadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1822; --bg-2:#0A1118; --panel:#16242F; --panel-2:#1B2D3A;
+    --line:rgba(143,163,176,.16); --line-2:rgba(143,163,176,.30);
+    --ink:#EAF1F4; --ink-dim:#A7BBC7; --muted:#7C93A1;
+    --enzo:#F4B53C; --matrix:#57D0E0;
+    --ok:#5FD08C; --pending:#F4B53C; --error:#F2685C;
+    --rail:#2C4250;
+    --disp:'Space Grotesk',sans-serif;
+    --body:'IBM Plex Sans',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(120% 120% at 80% -10%,#13202B 0%,var(--bg) 45%,var(--bg-2) 100%);
+    color:var(--ink);font-family:var(--body);
+    overflow:hidden;-webkit-font-smoothing:antialiased;
+  }
+  .deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+
+  /* top chrome */
+  .chrome{position:fixed;top:0;left:0;right:0;z-index:40;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 30px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    color:var(--muted);text-transform:uppercase}
+  .chrome .brand{display:flex;align-items:center;gap:10px}
+  .chrome .dot{width:7px;height:7px;border-radius:50%;background:var(--enzo);
+    box-shadow:0 0 0 4px rgba(244,181,60,.14)}
+  .chrome .count b{color:var(--ink);font-weight:600}
+  .progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--matrix),var(--enzo));
+    z-index:50;width:0;transition:width .45s cubic-bezier(.6,.1,.2,1)}
+
+  /* slides */
+  .slide{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    padding:96px 7vw 92px}
+  .slide.active{display:flex}
+  .pane{width:100%;max-width:1120px;opacity:0;transform:translateY(14px)}
+  .slide.active .pane{animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .stagger>*{opacity:0;transform:translateY(12px);animation:rise .55s cubic-bezier(.2,.7,.2,1) forwards}
+  .slide.active .stagger>*:nth-child(1){animation-delay:.05s}
+  .slide.active .stagger>*:nth-child(2){animation-delay:.13s}
+  .slide.active .stagger>*:nth-child(3){animation-delay:.21s}
+  .slide.active .stagger>*:nth-child(4){animation-delay:.29s}
+  .slide.active .stagger>*:nth-child(5){animation-delay:.37s}
+  .slide.active .stagger>*:nth-child(6){animation-delay:.45s}
+  .slide.active .stagger>*:nth-child(7){animation-delay:.53s}
+  .slide.active .stagger>*:nth-child(8){animation-delay:.61s}
+
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--matrix);margin-bottom:18px;display:flex;align-items:center;gap:12px}
+  .eyebrow .ln{height:1px;width:48px;background:var(--line-2)}
+  h1{font-family:var(--disp);font-weight:600;letter-spacing:-.01em;line-height:1.04}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(28px,3.6vw,46px);
+    letter-spacing:-.01em;line-height:1.05;margin-bottom:8px}
+  .lede{color:var(--ink-dim);font-size:clamp(15px,1.5vw,18px);line-height:1.55;max-width:62ch}
+  .mono{font-family:var(--mono)}
+
+  /* ---- cover ---- */
+  .cover h1{font-size:clamp(72px,15vw,168px);letter-spacing:-.04em}
+  .cover .glyph{font-family:var(--disp);font-weight:700;
+    background:linear-gradient(120deg,#FFD27A 0%,var(--enzo) 40%,#E89A2A 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 8px 40px rgba(244,181,60,.18))}
+  .cover .sub{font-family:var(--disp);font-weight:500;font-size:clamp(19px,2.4vw,30px);
+    color:var(--ink);margin-top:6px;letter-spacing:-.01em}
+  .cover .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;color:var(--ink-dim);
+    border:1px solid var(--line-2);border-radius:999px;padding:7px 13px;background:rgba(255,255,255,.02)}
+
+  /* ---- generic cards ---- */
+  .grid{display:grid;gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+    border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .card h3{font-family:var(--disp);font-weight:600;font-size:17px;margin-bottom:7px;letter-spacing:-.01em}
+  .card p{color:var(--ink-dim);font-size:13.5px;line-height:1.5}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---- big stat ---- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+  .stat{border:1px solid var(--line);border-radius:14px;padding:20px;background:rgba(255,255,255,.015)}
+  .stat .n{font-family:var(--disp);font-weight:700;font-size:clamp(30px,4vw,48px);letter-spacing:-.02em;line-height:1}
+  .stat .n.amber{color:var(--enzo)} .stat .n.cyan{color:var(--matrix)}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:9px;line-height:1.4}
+
+  /* ---- before / after comparison ---- */
+  .compare{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:stretch;margin-top:8px}
+  .compare .arrow{align-self:center;font-family:var(--disp);font-size:34px;color:var(--enzo)}
+  .col-head{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+  .before .col-head{color:var(--error)} .after .col-head{color:var(--ok)}
+  .col ul{list-style:none;display:grid;gap:10px}
+  .col li{font-size:14px;color:var(--ink-dim);line-height:1.45;padding-left:20px;position:relative}
+  .col li::before{content:"";position:absolute;left:0;top:8px;width:7px;height:7px;border-radius:50%}
+  .before li::before{background:var(--error)} .after li::before{background:var(--ok)}
+
+  /* ---- scope (qué hace / no hace) ---- */
+  .scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px}
+  .scope-col{display:grid;gap:10px}
+  .scope-item{padding:14px 18px;border-radius:12px;border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    font-size:13.5px;color:var(--ink-dim);line-height:1.45;
+    display:flex;align-items:flex-start;gap:10px}
+  .scope-item .icon{flex-shrink:0;font-size:16px;margin-top:1px}
+  .scope-do{border-color:rgba(95,208,140,.25)}
+  .scope-dont{border-color:rgba(242,104,92,.2)}
+
+  /* ---- actors / roles ---- */
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+  .role-card{border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2))}
+  .role-card .ico{font-size:24px;margin-bottom:6px}
+  .role-card .nm{font-family:var(--disp);font-weight:600;font-size:17px;margin-bottom:2px}
+  .role-card .rl{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--matrix);margin-bottom:8px}
+  .role-card p{font-size:13px;color:var(--ink-dim);line-height:1.5}
+  .role-card.key{border-color:rgba(244,181,60,.3)}
+  .role-card.key .rl{color:var(--enzo)}
+
+  /* ---- roadmap ---- */
+  .milestones{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:26px}
+  .milestone{text-align:center;border:1px solid var(--line);border-radius:14px;padding:24px 18px;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2))}
+  .milestone .day{font-family:var(--disp);font-weight:700;font-size:42px;letter-spacing:-.03em;line-height:1}
+  .milestone .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);margin-top:4px}
+  .milestone p{font-size:13px;color:var(--ink-dim);line-height:1.45;margin-top:14px}
+  .next-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .next-item{display:flex;align-items:center;gap:12px;padding:14px 18px;
+    border:1px solid var(--line);border-radius:12px;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2))}
+  .next-item .who{font-family:var(--mono);font-size:12px;font-weight:600;white-space:nowrap}
+  .next-item .what{font-size:13px;color:var(--ink-dim);line-height:1.4}
+
+  /* ---- business case / roi ---- */
+  .business-case{margin-top:24px;border:1px solid rgba(244,181,60,.2);border-radius:14px;
+    padding:20px 24px;background:rgba(244,181,60,.03)}
+  .bc-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--enzo);margin-bottom:14px}
+  .bc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .bc-half{border-radius:12px;padding:16px 18px}
+  .bc-half.sav{background:rgba(95,208,140,.06);border:1px solid rgba(95,208,140,.2)}
+  .bc-half.inv{background:rgba(242,104,92,.06);border:1px solid rgba(242,104,92,.2)}
+  .bc-half .hl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;margin-bottom:10px}
+  .bc-half.sav .hl{color:var(--ok)}
+  .bc-half.inv .hl{color:var(--error)}
+  .bc-metric{display:flex;justify-content:space-between;align-items:baseline;
+    padding:6px 0;font-size:13px;color:var(--ink-dim);border-bottom:1px solid var(--line)}
+  .bc-metric:last-child{border-bottom:none}
+  .bc-metric .v{font-family:var(--disp);font-weight:700;font-size:22px;color:var(--ink)}
+  .bc-metric .v.positive{color:var(--ok)}
+  .bc-metric .v.pending{color:var(--enzo);font-size:12px;font-weight:500;font-family:var(--mono)}
+  .bc-foot{font-size:10.5px;color:var(--muted);margin-top:12px;padding-top:10px;
+    border-top:1px solid var(--line);text-align:center;font-family:var(--mono)}
+
+  /* ---- risk / contingency ---- */
+  .risk-intro{font-size:13.5px;color:var(--ink-dim);line-height:1.5;margin-top:4px;margin-bottom:18px}
+  .risk-table{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+  .risk-card{border:1px solid var(--line);border-radius:12px;padding:16px;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2))}
+  .risk-card .rtag{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+    text-transform:uppercase;margin-bottom:6px}
+  .risk-card .rtag.alto{color:var(--error)}
+  .risk-card .rtag.medio{color:var(--enzo)}
+  .risk-card h4{font-family:var(--disp);font-weight:600;font-size:15px;margin-bottom:4px}
+  .risk-card .rmit{font-size:12px;color:var(--ink-dim);line-height:1.45;margin-top:6px;
+    padding-left:14px;position:relative}
+  .risk-card .rmit::before{content:"";position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%}
+  .risk-card .rmit.mit{color:var(--ok)}
+  .risk-card .rmit.mit::before{background:var(--ok)}
+  .risk-card .rmit.con{color:var(--enzo)}
+  .risk-card .rmit.con::before{background:var(--enzo)}
+  .risk-card .rmit.pen{color:var(--enzo);font-style:italic}
+  .risk-card .rmit.pen::before{background:var(--enzo)}
+  .risk-bar{font-size:12px;padding:12px 16px;border:1px solid rgba(244,181,60,.25);
+    border-radius:10px;background:rgba(244,181,60,.04);color:var(--ink-dim);line-height:1.5;margin-top:22px}
+
+  /* ---- closing ---- */
+  .closing{text-align:center}
+  .closing .big{font-family:var(--disp);font-weight:700;font-size:clamp(56px,10vw,120px);
+    letter-spacing:-.04em;
+    background:linear-gradient(120deg,#FFD27A 0%,var(--enzo) 40%,#E89A2A 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 8px 40px rgba(244,181,60,.18));margin-bottom:14px}
+
+  /* nav hint */
+  .hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:40;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);
+    text-transform:uppercase;display:flex;gap:18px;align-items:center}
+  .hint kbd{border:1px solid var(--line-2);border-radius:5px;padding:2px 7px;color:var(--ink-dim);font-size:10px}
+  .nav-arrows{position:fixed;bottom:16px;right:24px;z-index:41;display:flex;gap:8px}
+  .nav-arrows button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line-2);
+    background:rgba(255,255,255,.03);color:var(--ink-dim);font-size:17px;cursor:pointer;transition:.18s}
+  .nav-arrows button:hover{background:rgba(244,181,60,.12);color:var(--enzo);border-color:rgba(244,181,60,.4)}
+
+  @media (max-width:880px){
+    .slide{padding:88px 6vw 96px}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .compare{grid-template-columns:1fr}.compare .arrow{transform:rotate(90deg)}
+    .scope-grid,.roles,.milestones,.next-steps,.risk-table{grid-template-columns:1fr}
+    .bc-grid{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .pane,.stagger>*{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="chrome">
+  <div class="brand"><span class="dot"></span> Quick Help SAS · Proyecto Turing</div>
+  <div class="count">ENZO · Desvinculaciones automatizadas</div>
+  <div class="count mono"><b id="cur">01</b> / <span id="tot">10</span></div>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 · PORTADA -->
+  <section class="slide active">
+    <div class="pane cover">
+      <div class="eyebrow"><span class="ln"></span> Presentación a Grupo Funcional · Junio 2026</div>
+      <h1><span class="glyph">ENZO</span></h1>
+      <div class="sub">Tu aliado en desvinculaciones, sin demoras ni excusas.</div>
+      <div class="sub" style="font-size:clamp(14px,1.3vw,18px);color:var(--ink-dim);margin-top:12px">
+        <b style="color:var(--enzo)">E</b>nlace de <b style="color:var(--enzo)">N</b>egocio con <b style="color:var(--enzo)">Z</b>ero <b style="color:var(--enzo)">O</b>bstrucciones
+      </div>
+      <div class="meta">
+        <span class="tag">Decisiones tomadas</span>
+        <span class="tag">Documentos actualizados</span>
+        <span class="tag">Plataforma construida</span>
+        <span class="tag">Beta · Julio 2026</span>
+        <span class="tag">~200 desvinculaciones / mes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · EL PROBLEMA -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> El problema</div>
+      <h2>Hoy, una desvinculación toma entre 15 y 20 días hábiles.</h2>
+      <p class="lede">Sin trazabilidad, sin control, sin un responsable claro del proceso completo. Cada área busca la información por su lado.</p>
+      <div class="grid stagger" style="grid-template-columns:1fr 1fr;margin-top:24px">
+        <div class="card">
+          <h3 style="color:var(--error)">📁 Información dispersa</h3>
+          <p>Los datos del colaborador están repartidos en Excel, Drive, correos y sistemas separados. No hay un hilo conector.</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--error)">⚠️ Riesgo legal</h3>
+          <p>Sin validaciones automáticas de fueros, prepensionales o incapacidades. Un error de proceso expone a la compañía.</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--error)">🔄 Proceso sin dueño</h3>
+          <p>El líder hace llamadas, envía correos, persigue aprobaciones. No hay un flujo definido ni tiempos claros por paso.</p>
+        </div>
+        <div class="card">
+          <h3 style="color:var(--error)">📊 Sin métricas</h3>
+          <p>No se sabe cuánto tarda cada etapa, dónde se atoran los procesos ni cuántos están en curso en un momento dado.</p>
+        </div>
+      </div>
+      <div class="stats stagger">
+        <div class="stat"><div class="n amber">~200</div><div class="l">desvinculaciones al mes</div></div>
+        <div class="stat"><div class="n amber">~10</div><div class="l">desvinculaciones diarias</div></div>
+        <div class="stat"><div class="n amber">15-20</div><div class="l">días hábiles hoy por caso</div></div>
+        <div class="stat"><div class="n cyan">1</div><div class="l">día hábil — la meta con ENZO</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · QUÉ ES ENZO -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> Qué es ENZO</div>
+      <h2>Un asistente que orquesta todo el proceso de desvinculación.</h2>
+      <p class="lede">Desde que el líder pide la baja por WhatsApp hasta que nómina liquida. Todo automático, todo trazado con un solo ID.</p>
+      <div class="grid stagger" style="grid-template-columns:1fr 1fr;margin-top:24px">
+        <div class="card" style="border-color:rgba(244,181,60,.2)">
+          <h3>🔍 1. Valida al líder</h3>
+          <p>Verifica que quien pide la baja esté autorizado según su centro de costo. Sin excepciones.</p>
+        </div>
+        <div class="card" style="border-color:rgba(244,181,60,.2)">
+          <h3>🛡️ 2. Validación legal preventiva</h3>
+          <p>Revisa impedimentos contra base de nómina y SST: fueros, prepensionales, incapacidades, licencias. ENZO marca alertas; TH/Legal decide.</p>
+        </div>
+        <div class="card" style="border-color:rgba(244,181,60,.2)">
+          <h3>📎 3. Solicita el soporte correcto</h3>
+          <p>Pide el documento que corresponde según el tipo de desvinculación: renuncia, fin de obra, justa causa, etc.</p>
+        </div>
+        <div class="card" style="border-color:rgba(244,181,60,.2)">
+          <h3>📋 4. Captura novedades</h3>
+          <p>El líder reporta incapacidades, licencias o ausencias directamente en WhatsApp, sin formularios ni sistemas.</p>
+        </div>
+        <div class="card" style="border-color:rgba(244,181,60,.2)">
+            <h3>🖥️ 5. Coordina con IT</h3>
+           <p>ENZO notifica a IT constantemente para que gestione la recuperación de equipos en su módulo. IT actualiza el repositorio y carga descuentos. ENZO sincroniza automáticamente.</p>
+        </div>
+        <div class="card" style="border-color:rgba(244,181,60,.2)">
+          <h3>📤 6. Entrega a nómina</h3>
+          <p>Consolida toda la información y la envía a Nómina para liquidación en cortes programados (8am y 12pm).</p>
+        </div>
+        <div class="card" style="grid-column:1/-1;border-color:rgba(244,181,60,.2)">
+          <h3>✅ 7. Cierre asistido</h3>
+          <p>Certificados laborales, bajas en sistemas, sellado del caso. Ejecución automatizada con supervisión de Nómina.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · CÓMO FUNCIONA -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> Cómo funciona</div>
+      <h2>ENZO se apoya en OASIS, el RP de la compañía.</h2>
+      <p class="lede">No más Excel, no más drives, no más correos sueltos. Todo lo que ENZO valida cruza contra OASIS en tiempo real.</p>
+      <div class="grid stagger" style="grid-template-columns:1fr 1fr;margin-top:24px">
+        <div class="card" style="border-color:rgba(87,208,224,.25)">
+          <h3>📊 OASIS = la fuente de verdad</h3>
+          <p>En OASIS se define la <strong>planta autorizada</strong>: cuántas personas por cargo, por centro de costo, por jornada, por ciudad. ENZO cruza cada solicitud contra esta base.</p>
+        </div>
+        <div class="card" style="border-color:rgba(87,208,224,.25)">
+          <h3>🔗 Una plataforma, no mil archivos</h3>
+          <p>Todo lo que hoy está disperso —plazas, fueros, incapacidades, equipos IT— se administra desde OASIS + ENZO. Lo que no está en OASIS no se procesa.</p>
+        </div>
+        <div class="card" style="border-color:rgba(87,208,224,.25)">
+          <h3>📱 El líder solo usa WhatsApp</h3>
+          <p>Inicia la baja, adjunta el soporte, reporta novedades. Todo desde el chat. Sin formularios, sin sistemas, sin perseguir a nadie.</p>
+        </div>
+        <div class="card" style="border-color:rgba(87,208,224,.25)">
+          <h3>⏱️ Un ID único traza todo</h3>
+          <p>Desde que el líder pide la baja hasta que Nómina liquida. Cada paso queda registrado. Trazabilidad completa, sin hilos sueltos.</p>
+        </div>
+      </div>
+      <div class="stats stagger" style="margin-top:26px">
+        <div class="stat"><div class="n cyan">OASIS</div><div class="l">es el núcleo — todo se valida contra él</div></div>
+        <div class="stat"><div class="n amber">Único</div><div class="l">ID por desvinculación — todo asociado</div></div>
+        <div class="stat"><div class="n cyan">1</div><div class="l">punto de entrada: WhatsApp</div></div>
+        <div class="stat"><div class="n amber">1</div><div class="l">supervisión humana: Nómina (temporal)</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · POLÍTICAS -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> Políticas</div>
+      <h2>Las reglas del juego desde el 1 de julio.</h2>
+      <p class="lede">Políticas claras, sin ambigüedad. Lo que está en OASIS se procesa; lo que no está, no pasa.</p>
+      <div class="scope-grid stagger" style="margin-top:24px">
+        <div class="scope-col">
+          <div class="scope-item scope-do" style="border-color:rgba(244,181,60,.3);background:rgba(244,181,60,.04)">
+            <span class="icon" style="font-size:20px">📋</span>
+            <div>
+              <strong style="color:var(--enzo);font-size:14px">P1 · Validación contra OASIS</strong><br>
+              <span style="font-size:12.5px">A partir del <strong>1 de julio</strong>, todas las solicitudes de personal se validan contra OASIS, no contra los ANS. Lo que no esté en la planta autorizada de OASIS no se procesa.</span>
+            </div>
+          </div>
+          <div class="scope-item scope-do" style="border-color:rgba(244,181,60,.3);background:rgba(244,181,60,.04)">
+            <span class="icon" style="font-size:20px">🆕</span>
+            <div>
+              <strong style="color:var(--enzo);font-size:14px">P2 · Procesamiento por OASIS</strong><br>
+              <span style="font-size:12.5px">A partir del <strong>1 de julio</strong>, todos los colaboradores nuevos se procesan directamente a través de OASIS. Queda eliminado el proceso manual por ANS.</span>
+            </div>
+          </div>
+          <div class="scope-item scope-do" style="border-color:rgba(244,181,60,.3);background:rgba(244,181,60,.04)">
+            <span class="icon" style="font-size:20px">🛡️</span>
+            <div>
+              <strong style="color:var(--enzo);font-size:14px">P3 · Gestión desde ENZO</strong><br>
+              <span style="font-size:12.5px">A partir del <strong>1 de julio</strong>, todas las novedades (incapacidades, aforados, restricciones médicas) se gestionan únicamente desde la plataforma de ENZO.</span>
+            </div>
+          </div>
+        </div>
+        <div class="scope-col">
+          <div class="scope-item scope-do" style="border-color:rgba(244,181,60,.3);background:rgba(244,181,60,.04)">
+            <span class="icon" style="font-size:20px">🖥️</span>
+            <div>
+              <strong style="color:var(--enzo);font-size:14px">P4 · IT controla los activos tecnológicos</strong><br>
+              <span style="font-size:12.5px">IT tiene el control total sobre la recuperación, trazabilidad y actualización de equipos. ENZO centraliza el inventario y alerta sobre activos no recuperados. IT recupera, actualiza y cierra.</span>
+            </div>
+          </div>
+          <div class="scope-item scope-do" style="border-color:rgba(244,181,60,.3);background:rgba(244,181,60,.04)">
+            <span class="icon" style="font-size:20px">💰</span>
+            <div>
+              <strong style="color:var(--enzo);font-size:14px">P5 · Nómina administra la información en ENZO</strong><br>
+              <span style="font-size:12.5px">Nómina es responsable de actualizar y reposar la información de liquidaciones y novedades utilizando ENZO como repositorio único. Todo cierre requiere su revisión.</span>
+            </div>
+          </div>
+          <div class="scope-item scope-do" style="border-color:rgba(244,181,60,.3);background:rgba(244,181,60,.04)">
+            <span class="icon" style="font-size:20px">📋</span>
+            <div>
+              <strong style="color:var(--enzo);font-size:14px">P6 · RRHH garantiza la calidad del dato</strong><br>
+              <span style="font-size:12.5px">RRHH mantiene actualizadas las bases que ENZO consulta: fueros, prepensionales, SST, incapacidades y licencias. Sin datos al día, ENZO no puede validar legalmente.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · ALCANCE — QUÉ HACE Y QUÉ NO HACE -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> Alcance</div>
+      <h2>Qué hace ENZO y qué queda fuera.</h2>
+      <p class="lede">El alcance está definido para mantener el foco. Lo que no hace ENZO ya tiene un proceso que funciona.</p>
+      <div class="scope-grid stagger">
+        <div class="scope-col">
+          <div class="col-head" style="color:var(--ok);margin-bottom:2px">✅ Sí hace</div>
+          <div class="scope-item scope-do"><span class="icon">✅</span> Valida que el líder esté autorizado por centro de costo</div>
+          <div class="scope-item scope-do"><span class="icon">✅</span> Validación legal preventiva: fueros, prepensionales, SST, convivencia — ENZO alerta, TH decide</div>
+          <div class="scope-item scope-do"><span class="icon">✅</span> Captura el soporte documental por WhatsApp según el tipo de desvinculación</div>
+          <div class="scope-item scope-do"><span class="icon">✅</span> Reporte de novedades: incapacidades, licencias maternidad/paternidad, ausencias</div>
+           <div class="scope-item scope-do"><span class="icon">✅</span> Horas extras capturadas en chat y consolidadas en módulo HE</div>
+           <div class="scope-item scope-do"><span class="icon">✅</span> ENZO notifica a IT constantemente para que gestione la recuperación de equipos en su módulo. IT actualiza el repositorio y carga descuentos. ENZO sincroniza automáticamente.</div>
+          <div class="scope-item scope-do"><span class="icon">✅</span> Corte a nómina en horarios fijos 8am y 12pm</div>
+           <div class="scope-item scope-do"><span class="icon">✅</span> Cierre asistido: certificados, bajas en sistemas, sellado del caso (supervisado por Nómina)</div>
+                     <div class="scope-item scope-do"><span class="icon">✅</span> Validaciones automáticas contra reglas de TH/Legal — sin aprobaciones humanas intermedias. Nómina supervisa temporalmente (Fase 1 — julio)</div>
+        </div>
+        <div class="scope-col">
+          <div class="col-head" style="color:var(--error);margin-bottom:2px">❌ No hace</div>
+          <div class="scope-item scope-dont"><span class="icon">❌</span> Contabilidad — va directo a OASIS (el proceso actual funciona)</div>
+
+          <div class="scope-item scope-dont"><span class="icon">❌</span> Interacción con plataforma SENA — RRHH envía el soporte necesario</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · CÓMO FUNCIONA PARA CADA ROL -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> Qué necesita cada equipo</div>
+      <h2>Cada quien es garante de su parte.</h2>
+      <p class="lede">ENZO no reemplaza a nadie. Centraliza la información y le da trazabilidad a cada paso. Cada área es administradora de sus módulos y responsable de que los datos estén actualizados.</p>
+      <div class="roles stagger">
+        <div class="role-card key">
+          <div class="ico">📱</div>
+          <div class="nm">Líder</div>
+          <div class="rl">Solo WhatsApp</div>
+          <p>Inicia la baja, adjunta el soporte y reporta novedades. Todo en el chat. No llama, no envía correos, no persigue aprobaciones. NADA más.</p>
+        </div>
+        <div class="role-card key">
+          <div class="ico">💰</div>
+          <div class="nm">Nómina</div>
+          <div class="rl">Supervisión temporal · se automatiza en agosto</div>
+          <p>Recibe los IDs consolidados en cortes de 8am y 12pm. Durante julio supervisa y corrige; desde agosto la liquidación es automática.</p>
+        </div>
+        <div class="role-card key">
+          <div class="ico">🖥️</div>
+          <div class="nm">IT</div>
+          <div class="rl">Administrador de ENZO · equipos</div>
+          <p><strong>Garante del inventario de equipos.</strong> ENZO centraliza el rastreo: sabe quién tiene cada equipo, registra toda reasignación con trazabilidad inmediata y alerta sobre activos no recuperados. IT recupera, actualiza y carga descuentos. Fin del problema de equipos perdidos sin firma.</p>
+        </div>
+        <div class="role-card key">
+          <div class="ico">📋</div>
+          <div class="nm">RRHH</div>
+          <div class="rl">Administrador de ENZO · datos</div>
+          <p><strong>Garante de la calidad del dato.</strong> Mantiene actualizadas las bases que ENZO consulta: fueros, prepensionales, SST, incapacidades, licencias y aprendices SENA. ENZO centraliza esta información y hoy la vuelve rastreable. Sin datos al día, ENZO no puede validar.</p>
+        </div>
+        <div class="role-card" style="grid-column:1/-1;max-width:520px;justify-self:center">
+          <div class="ico">⚖️</div>
+          <div class="nm">TH / Legal</div>
+          <div class="rl">Define las reglas</div>
+          <p>Establece causales de desvinculación, parámetros legales y políticas. No interviene en procesos estándar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · ROADMAP -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> La ruta</div>
+      <h2>Decisiones tomadas · Documentos actualizados · Plataforma construida.</h2>
+      <div class="milestones stagger">
+        <div class="milestone" style="border-color:var(--enzo)">
+          <div class="day" style="color:var(--enzo);font-size:28px">Hecho</div>
+          <div class="lbl">Decisiones cerradas</div>
+          <p>Definiciones del proceso completas. Documentos actualizados. Plataforma web ya construida.</p>
+        </div>
+        <div class="milestone" style="border-color:var(--matrix)">
+          <div class="day" style="color:var(--matrix);font-size:36px">26</div>
+          <div class="lbl">JUN · 🚨 ENTREGA BASE</div>
+          <p><strong>Viernes 26 junio al mediodía:</strong> todos los líderes entregan la base de plazas autorizadas a Nicolás Barreto + Director admin y de Tech. Sin excepción.</p>
+        </div>
+        <div class="milestone" style="border-color:var(--ok)">
+          <div class="day" style="color:var(--ok)">1</div>
+          <div class="lbl">JUL · BETA 🚀</div>
+          <p>Warehouse (Juan Carlos Rojas). Arranque controlado — supervisión manual del 100% de los casos.</p>
+        </div>
+      </div>
+
+      <!-- Alerta: lo que no está en OASIS no se procesa -->
+      <div class="stagger" style="margin-top:20px;padding:16px 22px;border:2px solid var(--enzo);border-radius:12px;background:rgba(244,181,60,.06)">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <span style="font-size:28px;flex-shrink:0">⚠️</span>
+          <div>
+            <strong style="color:var(--enzo);font-size:15px">A partir del 1 de julio, toda solicitud se valida contra OASIS.</strong>
+            <p style="font-size:13px;color:var(--ink-dim);line-height:1.5;margin-top:4px">
+              Lo que no esté en la base de plazas autorizadas de OASIS <strong>no se procesa</strong>.
+              Las áreas que no entreguen su base al <strong>viernes 26 junio al mediodía</strong> quedarán fuera del nuevo modelo.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="col-head" style="margin-bottom:12px">📋 Lo que necesitamos de cada equipo</div>
+        <div class="next-steps stagger" style="margin-top:0">
+
+          <!-- TAREA MÁS IMPORTANTE: DESTACADA -->
+          <div class="next-item" style="grid-column:1/-1;border-color:var(--enzo);background:rgba(244,181,60,.06);padding:16px 20px">
+            <span class="who" style="color:var(--enzo);font-size:14px">🔴 TODOS LOS LÍDERES · ENTREGABLE #1</span>
+            <span class="what" style="font-size:13.5px">
+              <strong>Diligenciar la base de plazas autorizadas</strong> (planta por cargo y centro de costo). Es la base que alimenta a OASIS — sin esto, ENZO no puede operar.<br>
+              <span style="color:var(--enzo)"><strong>Fecha límite: viernes 26 junio al mediodía.</strong></span> Entregar a Nicolás Barreto + Director admin y de Tech.<br>
+              <em style="color:var(--muted)">A partir del 1 de julio, todo lo que no esté en esta base no se procesa.</em>
+            </span>
+          </div>
+
+          <div class="next-item"><span class="who" style="color:var(--matrix)">Director admin y de Tech</span><span class="what">Capacitación <strong>Nuevo modelo ANS</strong> · Miércoles, 24 junio ⋅ 10:00</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 9 · RIESGOS, CONTROLES Y CONTINGENCIA -->
+  <section class="slide">
+    <div class="pane">
+      <div class="eyebrow"><span class="ln"></span> Cómo falla y qué hacemos</div>
+      <h2>ENZO no es perfecto. Por eso tenemos plan para cuando algo salga mal.</h2>
+      <p class="risk-intro">Cada riesgo identificado tiene un control preventivo y un plan de contingencia. Esto no es teórico — son decisiones operativas.</p>
+      <div class="risk-table stagger">
+
+        <div class="risk-card">
+          <div class="rtag alto">ALTO</div>
+          <h4>Error en validación legal</h4>
+          <p style="font-size:12px;color:var(--ink-dim);line-height:1.4">ENZO podría no detectar un fuero o clasificar mal un prepensional.</p>
+          <div class="rmit mit">🛡️ Validación contra base de nómina y SST. Reglas definidas y auditadas por TH/Legal.</div>
+          <div class="rmit con">🔄 Revisión manual del caso por TH. Planilla de respaldo con corte diario.</div>
+        </div>
+
+        <div class="risk-card">
+          <div class="rtag alto">ALTO</div>
+          <h4>Datos sensibles por WhatsApp</h4>
+          <p style="font-size:12px;color:var(--ink-dim);line-height:1.4">Información de salud y laboral viajando por plataforma de tercero (Meta).</p>
+          <div class="rmit mit">🔐 WhatsApp Business con cifrado extremo a extremo. Líder autenticado por centro de costo.</div>
+          <div class="rmit con">📋 Política de retención y tratamiento definida con Legal.</div>
+        </div>
+
+        <div class="risk-card">
+          <div class="rtag alto">ALTO</div>
+          <h4>Error en liquidación HE</h4>
+          <p style="font-size:12px;color:var(--ink-dim);line-height:1.4">Lógica de HE definida — Nómina revisa cada liquidación antes de ejecutar pago.</p>
+          <div class="rmit mit">📐 Se liquida bajo lo estipulado en la ley colombiana actual.</div>
+          <div class="rmit con">🧾 Nómina aprueba cada liquidación antes de ejecutar pago.</div>
+        </div>
+
+        <div class="risk-card">
+          <div class="rtag medio">MEDIO</div>
+          <h4>ENZO no responde o falla</h4>
+          <p style="font-size:12px;color:var(--ink-dim);line-height:1.4">Caída del sistema, error no controlado, timeout en integración.</p>
+          <div class="rmit mit">📡 Monitoreo de disponibilidad. Alertas automáticas al equipo de Desarrollo.</div>
+          <div class="rmit con">📋 Plan de contingencia manual: líder reporta a Nómina por correo. Proceso actual como respaldo.</div>
+        </div>
+
+        <div class="risk-card">
+          <div class="rtag medio">MEDIO</div>
+          <h4>Error en cierre asistido</h4>
+          <p style="font-size:12px;color:var(--ink-dim);line-height:1.4">Certificado incorrecto, baja en sistema errónea, caso mal sellado.</p>
+          <div class="rmit mit">🔄 Nómina supervisa cada cierre antes de marcarlo como completado.</div>
+          <div class="rmit con">↩️ Botón de reversa disponible para Nómina: devuelve el caso a estado anterior.</div>
+        </div>
+
+      </div>
+      <div class="risk-bar">
+        ⚠️ <strong>Regla:</strong> ningún caso se cierra sin que Nómina haya revisado y aprobado explícitamente.
+        El piloto arranca con supervisión manual del 100% de los casos para validar el flujo.
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 · CIERRE -->
+  <section class="slide">
+    <div class="pane closing">
+      <div class="stagger">
+        <div class="big">¿Preguntas?</div>
+        <p class="lede" style="margin:0 auto;margin-top:6px">Sabemos cómo falla, tenemos plan para cada riesgo, y el piloto medirá el ahorro real. ¿Listos para el 1 de Julio?</p>
+        <div style="margin-top:40px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+          <span class="tag">PO</span>
+          <span class="tag">Desarrollo</span>
+          <span class="tag">Dirección</span>
+        </div>
+        <div style="margin-top:36px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em">
+          Quick Help SAS · Proyecto Turing · Junio 2026
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="hint"><span><kbd>←</kbd> <kbd>→</kbd> navegar</span><span><kbd>espacio</kbd> avanzar</span><span>clic en flechas</span></div>
+<div class="nav-arrows"><button id="prev" aria-label="Anterior">‹</button><button id="next" aria-label="Siguiente">›</button></div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const total=slides.length;let i=0;
+  const prog=document.getElementById('progress');
+  const cur=document.getElementById('cur');
+  document.getElementById('tot').textContent=String(total).padStart(2,'0');
+  function show(n){
+    i=Math.max(0,Math.min(total-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    prog.style.width=((i+1)/total*100)+'%';
+    cur.textContent=String(i+1).padStart(2,'0');
+  }
+  function next(){show(i+1)} function prev(){show(i-1)}
+  document.getElementById('next').onclick=next;
+  document.getElementById('prev').onclick=prev;
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();next()}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev()}
+    else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(total-1)}
+  });
+  let sx=0;
+  document.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+  document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-sx;
+    if(Math.abs(d)>50){d<0?next():prev()}},{passive:true});
+  show(0);
+</script>
+</body>
+</html>
