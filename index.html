@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Proyecto Turing · Quick</title>
+<title>PROYECTO TURING · Quick</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -32,7 +32,12 @@
     -webkit-background-clip:text;background-clip:text;color:transparent;filter:var(--glow);}
   .sub{font-family:var(--font-display);font-weight:400;font-size:clamp(16px,2.2vw,22px);
     color:var(--text-dim);margin-top:14px;max-width:46ch;text-align:center;line-height:1.4;}
-  .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px;width:100%;max-width:860px;}
+  .quote{font-family:var(--font-display);font-weight:400;font-style:italic;
+    font-size:clamp(15px,1.8vw,19px);color:var(--text);margin-top:28px;text-align:center;
+    max-width:42ch;line-height:1.45;opacity:.92;}
+  .quote .qauthor{display:block;font-style:normal;font-family:var(--font-mono);font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-top:12px;}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px;width:100%;max-width:860px;}
   .card{display:flex;flex-direction:column;text-decoration:none;color:inherit;
     background:linear-gradient(180deg,var(--panel),var(--panel-alt));
     border:1px solid var(--line);border-radius:18px;padding:36px 32px;
@@ -53,9 +58,10 @@
 </style>
 </head>
 <body>
-  <p class="eyebrow"><span class="ln"></span> Proyecto Turing · Quick</p>
-  <h1>Riel <span class="accent">Operativo</span></h1>
+  <p class="eyebrow"><span class="ln"></span> Quick · 2026</p>
+  <h1>Proyecto <span class="accent">Turing</span></h1>
   <p class="sub">Agentes de inteligencia artificial que transforman la operación, paso a paso.</p>
+  <p class="quote">“Un viaje de mil millas comienza con un solo paso.”<span class="qauthor">— Lao Tzu</span></p>
 
   <div class="cards">
     <a class="card" href="ciro.html">
