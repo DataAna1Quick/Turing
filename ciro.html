@@ -943,25 +943,26 @@
           {
             type: "comparison",
             data: {
-              eyebrow: "Qué resuelve",
+              eyebrow: "Qué resuelve · propuesta de valor",
               title:
-                "De un seguimiento manual a un control consistente y trazable.",
+                "Gestionar las comunicaciones de la operación, no solo hacer llamadas.",
+              lede: "Gestionar las comunicaciones con los interlocutores de la operación —conductor, transportador, cliente—, controlando y supervisando los riesgos. Convertir una comunicación dispersa y manual en una gestión centralizada, oportuna y trazable.",
               before: {
                 label: "Hoy",
                 items: [
-                  "El equipo marca y registra, servicio por servicio",
-                  "El seguimiento depende de que alguien llegue a hacerlo",
+                  "Comunicación dispersa y manual, servicio por servicio",
+                  "Depende de que alguien llegue a hacerla",
                   "El conocimiento se queda en cada persona",
-                  "Crecer el control exige sumar gente",
+                  "Sin evidencia consolidada de cada contacto",
                 ],
               },
               after: {
                 label: "Con CIRO",
                 items: [
-                  "El agente sigue y registra solo, a toda hora",
-                  "Control consistente y trazable, todos los días",
-                  "Cada interacción queda registrada y se vuelve dato",
-                  "El equipo pasa a aportar criterio donde de verdad suma",
+                  "Comunicación gestionada y centralizada, por voz y texto",
+                  "Consistente y a toda hora, sin depender de turnos",
+                  "Riesgos controlados y supervisados de forma eficiente",
+                  "Cada contacto trazable; cada interacción se vuelve dato",
                 ],
               },
               stats: [
@@ -1256,6 +1257,7 @@
             return `<div class="pane">
         <div class="eyebrow"><span class="ln"></span> ${d.eyebrow}</div>
         <h2>${d.title}</h2>
+        ${d.lede ? `<p class="lede" style="margin-top:6px">${d.lede}</p>` : ""}
         <div class="compare stagger">
           <div class="col col-before card"><div class="col-head col-head-before">🔴 ${d.before.label}</div><ul>${beforeItems}</ul></div>
           <div class="compare-arrow">→</div>
